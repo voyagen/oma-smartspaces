@@ -1,0 +1,38 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# Xenova/all-MiniLM-L6-v2, revision pinned for reproducible offline inference.
+revision=751bff37182d3f1213fa05d7196b954e230abad9
+base="https://huggingface.co/Xenova/all-MiniLM-L6-v2/resolve/$revision"
+parent="${XDG_DATA_HOME:-$HOME/.local/share}/oma-smartspaces/models"
+dest="$parent/minilm"
+mkdir -p "$parent"
+if [[ -e "$dest" ]]; then
+  printf 'Model directory already exists: %s\n' "$dest" >&2
+  exit 1
+fi
+stage=$(mktemp -d "$parent/.minilm.XXXXXXXX")
+trap 'rm -rf -- "$stage"' EXIT
+
+fetch() {
+  local source=$1 name=$2 expected=$3 actual
+  curl --fail --show-error --silent --location --proto '=https' --tlsv1.2 \
+    --max-time 300 "$base/$source" -o "$stage/$name"
+  actual=$(sha256sum "$stage/$name")
+  actual=${actual%% *}
+  if [[ "$actual" != "$expected" ]]; then
+    printf 'SHA-256 mismatch for %s: expected %s, got %s\n' "$name" "$expected" "$actual" >&2
+    exit 1
+  fi
+}
+
+fetch onnx/model_quantized.onnx model.onnx afdb6f1a0e45b715d0bb9b11772f032c399babd23bfc31fed1c170afc848bdb1
+fetch tokenizer.json tokenizer.json da0e79933b9ed51798a3ae27893d3c5fa4a201126cef75586296df9b4d2c62a0
+fetch tokenizer_config.json tokenizer_config.json 9261e7d79b44c8195c1cada2b453e55b00aeb81e907a6664974b4d7776172ab3
+fetch special_tokens_map.json special_tokens_map.json b6d346be366a7d1d48332dbc9fdf3bf8960b5d879522b7799ddba59e76237ee3
+fetch config.json config.json 7135149f7cffa1a573466c6e4d8423ed73b62fd2332c575bf738a0d033f70df7
+printf '%s\n' "$revision" > "$stage/REVISION"
+# Rename only after every byte is authenticated; never expose a partial model.
+mv -T -- "$stage" "$dest"
+trap - EXIT
+printf 'Installed offline model at %s\n' "$dest"

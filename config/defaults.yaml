@@ -1,0 +1,31 @@
+display:
+  show_icons: true
+  show_labels: true
+  max_label_length: 18
+
+icons:
+  library: lucide
+  size: 15
+  stroke_width: 2
+
+classifier:
+  enabled: true
+  minimum_confidence: 0.68
+
+behavior:
+  debounce_ms: 750
+  category_change_delay_ms: 5000
+  confidence_margin: 0.15
+
+workspace:
+  fallback: application
+
+rules: []
+
+# Example rule:
+# rules:
+#   - match:
+#       git_repo: oma-smartspaces
+#     name: Smartspaces
+#     category: development
+#     icon: code-2

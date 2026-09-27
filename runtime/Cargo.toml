@@ -1,0 +1,19 @@
+[package]
+name = "oma-smartspaces-runtime"
+version = "0.1.0"
+edition = "2021"
+
+[features]
+default = ["local-ai"]
+local-ai = ["dep:fastembed"]
+
+[dependencies]
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+serde_yaml = "0.9"
+fs2 = "0.4"
+fastembed = { version = "=5.8.1", optional = true, default-features = false, features = ["ort-download-binaries"] }
+
+[[bin]]
+name = "oma-smartspaces-runtime"
+path = "src/main.rs"

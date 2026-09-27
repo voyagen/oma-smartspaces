@@ -1,0 +1,28 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+repo=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)
+if ! command -v cargo >/dev/null 2>&1; then
+  toolchain_home="${CARGO_HOME:-$HOME/.cargo}"
+  if [[ -x "$toolchain_home/bin/cargo" ]]; then
+    export PATH="$toolchain_home/bin:$PATH"
+  else
+    stage=$(mktemp -d)
+    trap 'rm -rf -- "$stage"' EXIT
+    url=https://static.rust-lang.org/rustup/dist/x86_64-unknown-linux-gnu/rustup-init
+    curl --fail --show-error --silent --location --proto '=https' --tlsv1.2 --max-time 300 \
+      "$url" -o "$stage/rustup-init"
+    printf '%s  %s\n' dda7234360b7f578ca8b0ddcb80145646fa61a67c1720a5abc7051b35c9fcb71 \
+      "$stage/rustup-init" | sha256sum --check --status
+    chmod +x "$stage/rustup-init"
+    "$stage/rustup-init" -y --no-modify-path --default-toolchain stable
+    export PATH="$toolchain_home/bin:$PATH"
+  fi
+fi
+cargo build --release --locked --manifest-path "$repo/runtime/Cargo.toml"
+mkdir -p "${XDG_DATA_HOME:-$HOME/.local/share}/oma-smartspaces/runtime"
+install -m 755 "$repo/runtime/target/release/oma-smartspaces-runtime" \
+  "${XDG_DATA_HOME:-$HOME/.local/share}/oma-smartspaces/runtime/oma-smartspaces-runtime"
+mkdir -p "$HOME/.local/bin"
+install -m 755 "$repo/bin/oma-smartspaces" "$HOME/.local/bin/oma-smartspaces"
+printf 'Installed runtime and CLI in %s and %s\n' "${XDG_DATA_HOME:-$HOME/.local/share}/oma-smartspaces/runtime" "$HOME/.local/bin"

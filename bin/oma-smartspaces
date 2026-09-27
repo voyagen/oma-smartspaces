@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+set -euo pipefail
+runtime="${XDG_DATA_HOME:-$HOME/.local/share}/oma-smartspaces/runtime/oma-smartspaces-runtime"
+if [[ ! -x "$runtime" ]]; then
+  printf 'Smartspaces runtime not installed; run scripts/install-runtime in the plugin checkout.\n' >&2
+  exit 127
+fi
+exec "$runtime" "$@"

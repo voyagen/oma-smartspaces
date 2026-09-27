@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "id": "oma.smartspaces",
+  "name": "Smartspaces",
+  "version": "0.1.0",
+  "author": "oma-smartspaces contributors",
+  "description": "Context-aware Hyprland workspace labels with manual overrides",
+  "kinds": ["service", "bar-widget"],
+  "keepLoaded": true,
+  "entryPoints": {
+    "service": "qml/Service.qml",
+    "barWidget": "qml/BarWidget.qml"
+  },
+  "barWidget": {
+    "displayName": "Smartspaces",
+    "description": "Workspace icons and contextual labels",
+    "category": "Compositor",
+    "defaultSection": "left",
+    "allowMultiple": false
+  }
+}
