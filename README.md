@@ -10,6 +10,8 @@ Install from a Git repository containing this manifest:
 omarchy plugin add <repository-url> --enable
 ```
 
+Smartspaces requires the built-in Omarchy bar to access its live service. Third-party replacement bars give widgets a service-less facade: workspace numbers may appear, but classification, overrides, and menu actions will not work. Switch with `omarchy bar use omarchy.bar` before placing the widget; this replaces your current bar theme.
+
 Move `oma.smartspaces` into the bar's left section in Omarchy's bar settings and remove the existing workspace widget (`omarchy.workspaces` or another workspace indicator) if you want replacement rather than both. Omarchy does not build third-party Rust binaries during `plugin add`. In the plugin checkout, run:
 
 ```sh

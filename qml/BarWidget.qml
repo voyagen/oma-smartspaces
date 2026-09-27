@@ -63,7 +63,7 @@ BarWidget {
     return null
   }
 
-  function focus(id) {
+  function focusWorkspace(id) {
     var workspace = workspaceById(id)
     if (id < 0 && workspace) workspace.activate()
     else if (bar) bar.run("hyprctl dispatch " + Util.shellQuote("hl.dsp.focus({ workspace = \"" + id + "\" })"))
@@ -123,7 +123,7 @@ BarWidget {
           : "Workspace " + modelData + (state ? " · " + fullLabel + " · " + state.category + " (" + state.source + ")" : "")
         onPressed: function(b) {
           if (b === Qt.RightButton) root.openMenu(modelData, button)
-          else root.focus(modelData)
+          else root.focusWorkspace(modelData)
         }
 
         Row {
