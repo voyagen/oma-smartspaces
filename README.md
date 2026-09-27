@@ -26,6 +26,8 @@ Automatic application and Git-project labels work without a model. To enable loc
 
 The installer downloads only the pinned quantized MiniLM ONNX model and tokenizer from Hugging Face, verifies the published model SHA-256 and pinned tokenizer checksums before moving the complete set into `~/.local/share/oma-smartspaces/models/minilm/`. The optional ~23 MB model download is the only network operation during classification setup. After installation, model inference is offline. See `LICENSES/MODEL.txt` and `LICENSES/LUCIDE.txt` for asset notices.
 
+The menu clears its “reconnecting” message after the runtime returns a valid workspace response. If it persists, check the error line in the same menu and run `~/.local/share/oma-smartspaces/runtime/oma-smartspaces-runtime status`. The service is `keepLoaded`; after updating the plugin's QML, restart the Omarchy shell to load the changed service.
+
 ## Commands
 
 `scripts/install-runtime` installs `oma-smartspaces` into `~/.local/bin` (ensure this directory is on PATH) and its Rust backend into `~/.local/share/oma-smartspaces/runtime/`. Use the checkout's `bin/oma-smartspaces` if the bin directory is not on PATH.

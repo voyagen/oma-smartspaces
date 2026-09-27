@@ -11,6 +11,7 @@ Item {
     icon_size: 15, stroke_width: 2, debounce_ms: 750 })
   property string lastError: ""
   property bool available: false
+  property bool ready: false
   property var workspaces: []
   readonly property string configHome: Quickshell.env("XDG_CONFIG_HOME") || (Quickshell.env("HOME") + "/.config")
   readonly property string configDir: configHome + "/oma-smartspaces"
@@ -57,6 +58,7 @@ Item {
 
   function reconnect() {
     restart.stop()
+    ready = false
     if (runtime.running) {
       runtime.running = false
       Qt.callLater(function() { runtime.running = true })
@@ -105,6 +107,7 @@ Item {
     }
     if (response.settings) displaySettings = response.settings
     states = next
+    ready = true
     lastError = String(response.warning || "")
     if (response.pending_ms !== undefined && isFinite(response.pending_ms)) {
       pendingChange.interval = Math.max(1, Number(response.pending_ms))
@@ -166,6 +169,7 @@ Item {
     stdout: SplitParser { onRead: function(line) { root.receive(line) } }
     stderr: SplitParser { onRead: function(line) { if (String(line).trim()) root.lastError = String(line).trim() } }
     onExited: function(code) {
+      root.ready = false
       root.available = false
       root.lastError = "Smartspaces runtime unavailable (exit " + code + ")"
       restart.restart()

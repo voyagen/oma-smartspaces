@@ -14,6 +14,7 @@ BarWidget {
   property var anchorButton: null
   property string actionError: ""
   property string installStatus: ""
+  property bool awaitingRestart: false
   readonly property var selectedState: service ? service.stateFor(selectedWorkspace) : null
   readonly property string selectedLabel: selectedState ? String(selectedState.label || "") : ""
   readonly property string modelRoot: (Quickshell.env("XDG_DATA_HOME") || (Quickshell.env("HOME") + "/.local/share")) + "/oma-smartspaces/models/minilm"
@@ -182,12 +183,23 @@ BarWidget {
     onFileChanged: modelRevision.reload()
   }
 
+  Connections {
+    target: root.service
+    function onReadyChanged() {
+      if (root.awaitingRestart && root.service && root.service.ready) {
+        root.awaitingRestart = false
+        root.installStatus = ""
+      }
+    }
+  }
+
   Process {
     id: installRuntime
     command: [String(Qt.resolvedUrl("../scripts/install-runtime")).replace(/^file:\/\//, "")]
     onExited: function(code) {
+      root.awaitingRestart = code === 0 && !!root.service
       root.installStatus = code === 0 ? "Runtime installed; reconnecting…" : "Runtime installation failed (exit " + code + ")"
-      if (code === 0 && root.service) root.service.reconnect()
+      if (root.awaitingRestart) root.service.reconnect()
     }
     stderr: SplitParser { onRead: function(line) { if (String(line).trim()) root.installStatus = String(line).trim() } }
   }
@@ -195,9 +207,10 @@ BarWidget {
     id: installClassifier
     command: [String(Qt.resolvedUrl("../scripts/install-classifier")).replace(/^file:\/\//, "")]
     onExited: function(code) {
+      root.awaitingRestart = code === 0 && !!root.service
       root.installStatus = code === 0 ? "Classifier installed; restarting local runtime…" : "Classifier installation failed (exit " + code + ")"
       modelRevision.reload()
-      if (code === 0 && root.service) root.service.reconnect()
+      if (root.awaitingRestart) root.service.reconnect()
     }
     stderr: SplitParser { onRead: function(line) { if (String(line).trim()) root.installStatus = String(line).trim() } }
   }
